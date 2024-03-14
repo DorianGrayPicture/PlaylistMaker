@@ -14,16 +14,12 @@
 
         <TextView
             android:id="@+id/settings_back"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            style="@style/ScreenHeaderTextView"
             android:drawableLeft="@drawable/ic_arrow_back"
             android:drawablePadding="28dp"
-            android:fontFamily="@font/yandex_sans_text_medium"
             android:foreground="?attr/selectableItemBackground"
-            android:gravity="start"
             android:text="@string/settings_button"
-            android:textColor="@color/black"
-            android:textSize="@dimen/screen_header_text_size" />
+            android:textColor="@color/black" />
     </FrameLayout>
 
     <LinearLayout
@@ -33,43 +29,23 @@
         android:orientation="vertical">
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/settings_screen_button_size"
+            style="@style/SettingsScreenButtonStyle"
             android:drawableRight="@drawable/ic_switcher"
-            android:fontFamily="@font/yandex_sans_text_regular"
-            android:gravity="center_vertical"
-            android:text="@string/dark_theme"
-            android:textColor="@color/black"
-            android:textSize="@dimen/settings_screen_buttons_text_size" />
+            android:text="@string/dark_theme" />
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/settings_screen_button_size"
+            style="@style/SettingsScreenButtonStyle"
             android:drawableRight="@drawable/ic_share"
-            android:fontFamily="@font/yandex_sans_text_regular"
-            android:gravity="center_vertical"
-            android:text="@string/share"
-            android:textColor="@color/black"
-            android:textSize="@dimen/settings_screen_buttons_text_size" />
+            android:text="@string/share" />
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/settings_screen_button_size"
+            style="@style/SettingsScreenButtonStyle"
             android:drawableRight="@drawable/ic_support"
-            android:fontFamily="@font/yandex_sans_text_regular"
-            android:gravity="center_vertical"
-            android:text="@string/support"
-            android:textColor="@color/black"
-            android:textSize="@dimen/settings_screen_buttons_text_size" />
+            android:text="@string/support" />
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/settings_screen_button_size"
+            style="@style/SettingsScreenButtonStyle"
             android:drawableRight="@drawable/ic_arrow_forward"
-            android:fontFamily="@font/yandex_sans_text_regular"
-            android:gravity="center_vertical"
-            android:text="@string/consumer_application"
-            android:textColor="@color/black"
-            android:textSize="@dimen/settings_screen_buttons_text_size" />
+            android:text="@string/consumer_application" />
     </LinearLayout>
 </LinearLayout>
