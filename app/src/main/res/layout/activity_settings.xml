@@ -33,16 +33,19 @@
             android:text="@string/dark_theme" />
 
         <TextView
+            android:id="@+id/share_app"
             style="@style/SettingsScreenButtonStyle"
             android:drawableRight="@drawable/ic_share"
             android:text="@string/share" />
 
         <TextView
+            android:id="@+id/text_to_support"
             style="@style/SettingsScreenButtonStyle"
             android:drawableRight="@drawable/ic_support"
             android:text="@string/support" />
 
         <TextView
+            android:id="@+id/consumer_application"
             style="@style/SettingsScreenButtonStyle"
             android:drawableRight="@drawable/ic_arrow_forward"
             android:text="@string/consumer_application" />
