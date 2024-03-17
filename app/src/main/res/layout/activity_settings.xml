@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="?attr/colorSecondary"
     android:orientation="vertical"
     android:paddingHorizontal="@dimen/screen_horizontal_padding"
     android:paddingTop="@dimen/screen_top_padding"
@@ -18,8 +18,7 @@
             android:drawableLeft="@drawable/ic_arrow_back"
             android:drawablePadding="28dp"
             android:foreground="?attr/selectableItemBackground"
-            android:text="@string/settings_button"
-            android:textColor="@color/black" />
+            android:text="@string/settings_button" />
     </FrameLayout>
 
     <LinearLayout
