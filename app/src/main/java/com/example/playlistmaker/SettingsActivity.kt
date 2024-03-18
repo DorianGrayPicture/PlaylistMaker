@@ -22,30 +22,36 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         shareAppButton.setOnClickListener {
-            val link = "https://practicum.yandex.ru/android-developer/?from=catalog"
-            val shareIntent = Intent(Intent.ACTION_SEND)
-            shareIntent.type = "text/plain"
-            shareIntent.putExtra(Intent.EXTRA_TEXT, link)
-            startActivity(Intent.createChooser(shareIntent, "Sharing app"))
+            val link = resources.getString(R.string.yandex_practicum_link)
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, link)
+            }
+            val chooser: Intent = Intent.createChooser(shareIntent, null)
+            if (shareIntent.resolveActivity(packageManager) != null) {
+                startActivity(chooser)
+            }
         }
 
         textToSupportButton.setOnClickListener {
-            val message = "Спасибо разработчикам за крутое приложение!"
-            val messageTopic = "Сообщение разработчикам приложения Playlist Maker"
-            val supportIntent = Intent(Intent.ACTION_SENDTO)
-            supportIntent.data = Uri.parse("mailto:")
-            supportIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf("ArbeitenDenis@yandex.ru"))
-            supportIntent.putExtra(
-                Intent.EXTRA_SUBJECT,
-                messageTopic
-            )
-            supportIntent.putExtra(Intent.EXTRA_TEXT, message)
-            startActivity(supportIntent)
+            val text = resources.getString(R.string.text_to_support)
+            val subject = resources.getString(R.string.topic_text_to_support)
+            val email = arrayOf(resources.getString(R.string.student_email))
+            val supportIntent = Intent(Intent.ACTION_SENDTO).apply {
+                data = Uri.parse("mailto:")
+                putExtra(Intent.EXTRA_EMAIL, email)
+                putExtra(Intent.EXTRA_SUBJECT, subject)
+                putExtra(Intent.EXTRA_TEXT, text)
+            }
+            if (supportIntent.resolveActivity(packageManager) != null) {
+                startActivity(supportIntent)
+            }
         }
 
         openConsumerApplicationButton.setOnClickListener {
-            val browseIntent =
-                Intent(Intent.ACTION_VIEW, Uri.parse("https://yandex.ru/legal/practicum_offer/"))
+            val webpage: Uri = Uri.parse(resources.getString(R.string.practicum_offer))
+            val browseIntent = Intent(Intent.ACTION_VIEW, webpage)
+
             startActivity(browseIntent)
         }
     }
