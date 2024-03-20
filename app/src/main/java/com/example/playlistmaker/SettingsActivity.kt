@@ -1,10 +1,12 @@
 package com.example.playlistmaker
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView
+import android.widget.Toast
 
 class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,8 +30,12 @@ class SettingsActivity : AppCompatActivity() {
                 putExtra(Intent.EXTRA_TEXT, link)
             }
             val chooser: Intent = Intent.createChooser(shareIntent, null)
-            if (shareIntent.resolveActivity(packageManager) != null) {
+
+            try {
                 startActivity(chooser)
+            } catch (e: ActivityNotFoundException) {
+                val toast = Toast.makeText(applicationContext, resources.getString(R.string.app_not_found), Toast.LENGTH_SHORT)
+                toast.show()
             }
         }
 
@@ -43,8 +49,12 @@ class SettingsActivity : AppCompatActivity() {
                 putExtra(Intent.EXTRA_SUBJECT, subject)
                 putExtra(Intent.EXTRA_TEXT, text)
             }
-            if (supportIntent.resolveActivity(packageManager) != null) {
+
+            try {
                 startActivity(supportIntent)
+            } catch (e: ActivityNotFoundException) {
+                val toast = Toast.makeText(applicationContext, "Error message", Toast.LENGTH_SHORT)
+                toast.show()
             }
         }
 
@@ -52,7 +62,12 @@ class SettingsActivity : AppCompatActivity() {
             val webpage: Uri = Uri.parse(resources.getString(R.string.practicum_offer))
             val browseIntent = Intent(Intent.ACTION_VIEW, webpage)
 
-            startActivity(browseIntent)
+            try {
+                startActivity(browseIntent)
+            } catch (e: ActivityNotFoundException) {
+                val toast = Toast.makeText(applicationContext, "Error message", Toast.LENGTH_SHORT)
+                toast.show()
+            }
         }
     }
 }
