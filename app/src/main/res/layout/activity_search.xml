@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorSecondary"
+    android:orientation="vertical"
+    android:paddingHorizontal="@dimen/screen_horizontal_padding"
+    android:paddingTop="@dimen/screen_top_padding"
+    android:paddingBottom="@dimen/screen_bottom_padding">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/search_back"
+            style="@style/ScreenHeaderTextView"
+            android:drawableLeft="@drawable/ic_arrow_back"
+            android:drawablePadding="28dp"
+            android:foreground="?attr/selectableItemBackground"
+            android:text="@string/search_button" />
+    </FrameLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/inputEditText"
+            style="@style/SearchField"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:inputType="text"
+            android:textCursorDrawable="@drawable/custom_cursor">
+
+        </EditText>
+
+        <ImageView
+            android:id="@+id/clearIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@id/inputEditText"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:visibility="gone"/>
+    </RelativeLayout>
+</LinearLayout>
