@@ -14,6 +14,7 @@ import android.widget.TextView
 class SearchActivity : AppCompatActivity() {
 
     private lateinit var inputEditText: EditText
+    private var savedText = INPUT_TEXT_DEF
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
@@ -59,7 +60,6 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    private var savedText = INPUT_TEXT_DEF
     override fun onSaveInstanceState(outState: Bundle) {
         outState.run {
             putString(INPUT_TEXT, savedText)

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSecondary"
@@ -15,10 +16,10 @@
         <TextView
             android:id="@+id/settings_back"
             style="@style/ScreenHeaderTextView"
-            android:drawableLeft="@drawable/ic_arrow_back"
             android:drawablePadding="28dp"
             android:foreground="?attr/selectableItemBackground"
-            android:text="@string/settings_button" />
+            android:text="@string/settings_button"
+            app:drawableLeftCompat="@drawable/ic_arrow_back" />
     </FrameLayout>
 
     <LinearLayout
@@ -29,25 +30,24 @@
 
         <TextView
             style="@style/SettingsScreenButtonStyle"
-            android:drawableRight="@drawable/ic_switcher"
             android:text="@string/dark_theme" />
 
         <TextView
             android:id="@+id/share_app"
             style="@style/SettingsScreenButtonStyle"
-            android:drawableRight="@drawable/ic_share"
-            android:text="@string/share" />
+            android:text="@string/share"
+            app:drawableEndCompat="@drawable/ic_share" />
 
         <TextView
             android:id="@+id/text_to_support"
             style="@style/SettingsScreenButtonStyle"
-            android:drawableRight="@drawable/ic_support"
-            android:text="@string/support" />
+            android:text="@string/support"
+            app:drawableEndCompat="@drawable/ic_support" />
 
         <TextView
             android:id="@+id/consumer_application"
             style="@style/SettingsScreenButtonStyle"
-            android:drawableRight="@drawable/ic_arrow_forward"
-            android:text="@string/consumer_application" />
+            android:text="@string/consumer_application"
+            app:drawableEndCompat="@drawable/ic_arrow_forward" />
     </LinearLayout>
 </LinearLayout>
