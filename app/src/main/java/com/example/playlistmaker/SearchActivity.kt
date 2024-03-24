@@ -1,7 +1,6 @@
 package com.example.playlistmaker
 
 import android.content.Context
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -13,27 +12,25 @@ import android.widget.ImageView
 import android.widget.TextView
 
 class SearchActivity : AppCompatActivity() {
+
+    private lateinit var inputEditText: EditText
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
+        inputEditText = findViewById(R.id.inputEditText)
         val navigateBackButton = findViewById<TextView>(R.id.search_back)
-        val inputEditText = findViewById<EditText>(R.id.inputEditText)
         val clearButton = findViewById<ImageView>(R.id.clearIcon)
 
         clearButton.setOnClickListener {
             inputEditText.setText("")
 
-            val view = this.currentFocus
-            if(view != null) {
-                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.hideSoftInputFromWindow(view.windowToken, 0)
-            }
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(inputEditText.windowToken, 0)
         }
 
         navigateBackButton.setOnClickListener {
-            val navigateBackIntent = Intent(this, MainActivity::class.java)
-            startActivity(navigateBackIntent)
+            finish()
         }
 
         val textWatcher = object : TextWatcher {
@@ -43,6 +40,7 @@ class SearchActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 clearButton.visibility = clearButtonVisibility(s)
+                savedText = s.toString()
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -59,5 +57,26 @@ class SearchActivity : AppCompatActivity() {
         } else {
             View.VISIBLE
         }
+    }
+
+    private var savedText = INPUT_TEXT_DEF
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.run {
+            putString(INPUT_TEXT, savedText)
+        }
+
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+
+        savedText = savedInstanceState.getString(INPUT_TEXT, INPUT_TEXT_DEF)
+        inputEditText.setText(savedText)
+    }
+
+    companion object {
+        const val INPUT_TEXT = "INPUT_TEXT"
+        const val INPUT_TEXT_DEF = ""
     }
 }

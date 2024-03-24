@@ -19,8 +19,7 @@ class SettingsActivity : AppCompatActivity() {
         val openConsumerApplicationButton = findViewById<TextView>(R.id.consumer_application)
 
         navigateBackButton.setOnClickListener {
-            val navigateBackIntent = Intent(this, MainActivity::class.java)
-            startActivity(navigateBackIntent)
+            finish()
         }
 
         shareAppButton.setOnClickListener {
