@@ -12,7 +12,7 @@
         <item name="android:drawableTint">@color/black</item>
     </style>
 
-    <style name="MainScreenButtonStyle" parent="Widget.MaterialComponents.Button">
+    <style name="MainScreenButtonStyle" parent="Widget.MaterialComponents.Button.UnelevatedButton">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">0dp</item>
         <item name="android:layout_weight">1</item>
