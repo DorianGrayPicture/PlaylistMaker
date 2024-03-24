@@ -39,12 +39,13 @@
 
         <ImageView
             android:id="@+id/clearIcon"
+            style="@style/ClearIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignEnd="@id/inputEditText"
             android:layout_centerVertical="true"
             android:layout_gravity="center"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
-            android:visibility="gone"/>
+            android:layout_marginEnd="14dp"
+            android:visibility="gone" />
     </RelativeLayout>
 </LinearLayout>

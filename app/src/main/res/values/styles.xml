@@ -51,4 +51,8 @@
         <item name="android:maxLength">20</item>
         <item name="android:textColorHint">@color/query_hint_color</item>
     </style>
+
+    <style name="ClearIcon">
+        <item name="android:src">@drawable/clear_icon</item>
+    </style>
 </resources>
