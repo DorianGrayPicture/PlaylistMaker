@@ -5,26 +5,34 @@
     android:background="?attr/colorSecondary"
     android:orientation="vertical"
     android:paddingHorizontal="@dimen/screen_horizontal_padding"
-    android:paddingTop="@dimen/screen_top_padding"
     android:paddingBottom="@dimen/screen_bottom_padding">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <androidx.appcompat.widget.Toolbar style="@style/ScreenHeaderToolBar">
 
-        <TextView
-            android:id="@+id/search_back"
-            style="@style/ScreenHeaderTextView"
-            android:drawableLeft="@drawable/ic_arrow_back"
-            android:drawablePadding="28dp"
-            android:foreground="?attr/selectableItemBackground"
-            android:text="@string/search_button" />
-    </FrameLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/navigate_back"
+                style="@style/ArrowBackIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                style="@style/ScreenHeaderTextView"
+                android:layout_marginStart="24dp"
+                android:text="@string/search_button" />
+
+        </LinearLayout>
+
+    </androidx.appcompat.widget.Toolbar>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="8dp"
         android:orientation="horizontal">
 
         <EditText

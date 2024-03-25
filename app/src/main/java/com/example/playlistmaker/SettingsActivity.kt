@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 
@@ -13,7 +14,7 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        val navigateBackButton = findViewById<TextView>(R.id.settings_back)
+        val navigateBackButton = findViewById<ImageView>(R.id.navigate_back)
         val shareAppButton = findViewById<TextView>(R.id.share_app)
         val textToSupportButton = findViewById<TextView>(R.id.text_to_support)
         val openConsumerApplicationButton = findViewById<TextView>(R.id.consumer_application)

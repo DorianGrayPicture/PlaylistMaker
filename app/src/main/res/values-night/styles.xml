@@ -57,4 +57,8 @@
     <style name="ClearIcon">
         <item name="android:src">@drawable/clear_icon_night</item>
     </style>
+
+    <style name="ArrowBackIcon">
+        <item name="android:src">@drawable/ic_arrow_back_night</item>
+    </style>
 </resources>

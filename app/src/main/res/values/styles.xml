@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="ScreenHeaderTextView">
+    <style name="ScreenHeaderToolBar">
         <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="contentInsetStart">0dp</item>
+    </style>
+
+    <style name="ScreenHeaderTextView">
+        <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:fontFamily">@font/ys_display_medium</item>
         <item name="android:textFontWeight">500</item>
@@ -55,5 +61,9 @@
 
     <style name="ClearIcon">
         <item name="android:src">@drawable/clear_icon</item>
+    </style>
+
+    <style name="ArrowBackIcon">
+        <item name="android:src">@drawable/ic_arrow_back</item>
     </style>
 </resources>
