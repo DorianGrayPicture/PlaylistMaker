@@ -3,7 +3,6 @@ package com.example.playlistmaker
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 
 class MainActivity : AppCompatActivity() {
@@ -15,25 +14,19 @@ class MainActivity : AppCompatActivity() {
         val mediaLibraryButton = findViewById<Button>(R.id.media_library)
         val settingsButton = findViewById<Button>(R.id.settings)
 
-        val searchButtonClickListener: View.OnClickListener = object : View.OnClickListener {
-            override fun onClick(p0: View?) {
-                val searchIntent = Intent(this@MainActivity, SearchActivity::class.java)
-                startActivity(searchIntent)
-            }
+        searchButton.setOnClickListener {
+            val searchIntent = Intent(this@MainActivity, SearchActivity::class.java)
+            startActivity(searchIntent)
         }
 
-        val mediaLibraryButtonClickListener: View.OnClickListener = View.OnClickListener {
+        mediaLibraryButton.setOnClickListener {
             val mediaLibraryIntent = Intent(this, MediaLibraryActivity::class.java)
             startActivity(mediaLibraryIntent)
         }
 
-        val settingsButtonClickListener: View.OnClickListener = View.OnClickListener {
+        settingsButton.setOnClickListener {
             val settingsIntent = Intent(this, SettingsActivity::class.java)
             startActivity(settingsIntent)
         }
-
-        searchButton.setOnClickListener(searchButtonClickListener)
-        mediaLibraryButton.setOnClickListener(mediaLibraryButtonClickListener)
-        settingsButton.setOnClickListener(settingsButtonClickListener)
     }
 }

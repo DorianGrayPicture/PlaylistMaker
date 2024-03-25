@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSecondary"
@@ -21,42 +20,40 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
-
             <TextView
                 style="@style/ScreenHeaderTextView"
                 android:layout_marginStart="24dp"
-                android:text="@string/settings_button" />
+                android:text="@string/search_button" />
 
         </LinearLayout>
 
     </androidx.appcompat.widget.Toolbar>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="24dp"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
 
-        <TextView
-            style="@style/SettingsScreenButtonStyle"
-            android:text="@string/dark_theme" />
+        <EditText
+            android:id="@+id/inputEditText"
+            style="@style/SearchField"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:inputType="text"
+            android:textCursorDrawable="@drawable/custom_cursor">
 
-        <TextView
-            android:id="@+id/share_app"
-            style="@style/SettingsScreenButtonStyle"
-            android:text="@string/share"
-            app:drawableEndCompat="@drawable/ic_share" />
+        </EditText>
 
-        <TextView
-            android:id="@+id/text_to_support"
-            style="@style/SettingsScreenButtonStyle"
-            android:text="@string/support"
-            app:drawableEndCompat="@drawable/ic_support" />
-
-        <TextView
-            android:id="@+id/consumer_application"
-            style="@style/SettingsScreenButtonStyle"
-            android:text="@string/consumer_application"
-            app:drawableEndCompat="@drawable/ic_arrow_forward" />
-    </LinearLayout>
+        <ImageView
+            android:id="@+id/clearIcon"
+            style="@style/ClearIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@id/inputEditText"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:layout_marginEnd="14dp"
+            android:visibility="gone" />
+    </RelativeLayout>
 </LinearLayout>
