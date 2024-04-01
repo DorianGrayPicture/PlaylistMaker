@@ -4,7 +4,6 @@
     android:layout_height="match_parent"
     android:background="?attr/colorSecondary"
     android:orientation="vertical"
-    android:paddingHorizontal="@dimen/screen_horizontal_padding"
     android:paddingBottom="@dimen/screen_bottom_padding">
 
     <androidx.appcompat.widget.Toolbar style="@style/ScreenHeaderToolBar">
@@ -12,7 +11,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:paddingHorizontal="@dimen/screen_horizontal_padding">
 
             <ImageView
                 android:id="@+id/navigate_back"
@@ -33,7 +33,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:orientation="horizontal">
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/screen_horizontal_padding">
 
         <EditText
             android:id="@+id/inputEditText"
@@ -56,4 +58,9 @@
             android:layout_marginEnd="14dp"
             android:visibility="gone" />
     </RelativeLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </LinearLayout>

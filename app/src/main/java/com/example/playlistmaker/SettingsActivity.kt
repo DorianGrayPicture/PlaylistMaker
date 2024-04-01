@@ -34,7 +34,11 @@ class SettingsActivity : AppCompatActivity() {
             try {
                 startActivity(chooser)
             } catch (e: ActivityNotFoundException) {
-                val toast = Toast.makeText(applicationContext, resources.getString(R.string.app_not_found), Toast.LENGTH_SHORT)
+                val toast = Toast.makeText(
+                    applicationContext,
+                    resources.getString(R.string.app_not_found),
+                    Toast.LENGTH_SHORT
+                )
                 toast.show()
             }
         }
@@ -53,7 +57,11 @@ class SettingsActivity : AppCompatActivity() {
             try {
                 startActivity(supportIntent)
             } catch (e: ActivityNotFoundException) {
-                val toast = Toast.makeText(applicationContext, resources.getString(R.string.app_not_found), Toast.LENGTH_SHORT)
+                val toast = Toast.makeText(
+                    applicationContext,
+                    resources.getString(R.string.app_not_found),
+                    Toast.LENGTH_SHORT
+                )
                 toast.show()
             }
         }
@@ -65,7 +73,11 @@ class SettingsActivity : AppCompatActivity() {
             try {
                 startActivity(browseIntent)
             } catch (e: ActivityNotFoundException) {
-                val toast = Toast.makeText(applicationContext, resources.getString(R.string.app_not_found), Toast.LENGTH_SHORT)
+                val toast = Toast.makeText(
+                    applicationContext,
+                    resources.getString(R.string.app_not_found),
+                    Toast.LENGTH_SHORT
+                )
                 toast.show()
             }
         }

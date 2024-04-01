@@ -9,7 +9,8 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 class SearchActivity : AppCompatActivity() {
 
@@ -22,6 +23,10 @@ class SearchActivity : AppCompatActivity() {
         inputEditText = findViewById(R.id.inputEditText)
         val navigateBackButton = findViewById<ImageView>(R.id.navigate_back)
         val clearButton = findViewById<ImageView>(R.id.clearIcon)
+        val recycler = findViewById<RecyclerView>(R.id.recyclerView)
+        val tracks = TrackService().getTracks()
+        recycler.layoutManager = LinearLayoutManager(this)
+        recycler.adapter = TrackAdapter(tracks)
 
         clearButton.setOnClickListener {
             inputEditText.setText("")

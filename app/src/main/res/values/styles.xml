@@ -66,4 +66,12 @@
     <style name="ArrowBackIcon">
         <item name="android:src">@drawable/ic_arrow_back</item>
     </style>
+
+    <style name="SeparatorEllipseIcon">
+        <item name="android:src">@drawable/ic_separator</item>
+    </style>
+
+    <style name="ArrowForwardIcon">
+        <item name="android:src">@drawable/ic_arrow_forward</item>
+    </style>
 </resources>

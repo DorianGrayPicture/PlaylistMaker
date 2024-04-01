@@ -5,4 +5,6 @@
     <color name="light_theme_background">#3772e7</color>
     <color name="query_background">#E6E8EB</color>
     <color name="query_hint_color">#AEAFB4</color>
+    <color name="song_name_text_color">@color/black</color>
+    <color name="song_info_text_color">#AEAFB4</color>
 </resources>
