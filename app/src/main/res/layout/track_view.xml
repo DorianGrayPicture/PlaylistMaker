@@ -25,12 +25,9 @@
 
         <TextView
             android:id="@+id/trackName"
+            style="@style/TrackNameText"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/ys_display_regular"
-            android:singleLine="true"
-            android:textColor="@color/song_name_text_color"
-            android:textSize="16sp" />
+            android:layout_height="wrap_content" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -39,14 +36,10 @@
 
             <TextView
                 android:id="@+id/artistName"
+                style="@style/SongInfoText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ellipsize="end"
-                android:fontFamily="@font/ys_display_regular"
-                android:maxLines="1"
-                android:textColor="@color/song_info_text_color"
-                android:textSize="11sp" />
+                android:layout_weight="1" />
 
             <ImageView
                 style="@style/SeparatorEllipseIcon"
@@ -56,14 +49,10 @@
 
             <TextView
                 android:id="@+id/trackTime"
+                style="@style/SongInfoText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="0dp"
-                android:ellipsize="end"
-                android:fontFamily="@font/ys_display_regular"
-                android:maxLines="1"
-                android:textColor="@color/song_info_text_color"
-                android:textSize="11sp" />
+                android:layout_marginEnd="0dp" />
         </LinearLayout>
     </LinearLayout>
 
