@@ -1,5 +1,6 @@
 package com.example.playlistmaker
 
+import Track
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -23,7 +24,8 @@ class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     fun bind(model: Track) {
         trackNameView.text = model.trackName
         artistNameView.text = model.artistName
-        trackTimeView.text = model.trackTime
+        trackTimeView.text = model.trackTimeMillis.toString()
+
         val imageUrl = model.artworkUrl100
         Glide.with(itemView)
             .load(imageUrl)

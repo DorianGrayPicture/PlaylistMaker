@@ -1,38 +1,112 @@
 package com.example.playlistmaker
 
+import Track
+import TracksResponse
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class SearchActivity : AppCompatActivity() {
 
+    private val iTunesBaseUrl = "https://itunes.apple.com"
+
+    private val retrofit = Retrofit.Builder()
+        .baseUrl(iTunesBaseUrl)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    private val iTunesService: ITunesApi = retrofit.create(ITunesApi::class.java)
+
     private lateinit var inputEditText: EditText
+    private lateinit var navigateBackButton: ImageView
+    private lateinit var clearButton: ImageView
+    private lateinit var recycler: RecyclerView
+    private lateinit var placeholder: ImageView
+    private lateinit var placeholderText: TextView
+
+    private val tracks = ArrayList<Track>()
+
+    private val adapter = TrackAdapter()
+
     private var savedText = INPUT_TEXT_DEF
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
         inputEditText = findViewById(R.id.inputEditText)
-        val navigateBackButton = findViewById<ImageView>(R.id.navigate_back)
-        val clearButton = findViewById<ImageView>(R.id.clearIcon)
-        val recycler = findViewById<RecyclerView>(R.id.recyclerView)
-        val tracks = TrackService().getTracks()
-        recycler.layoutManager = LinearLayoutManager(this)
-        recycler.adapter = TrackAdapter(tracks)
+        navigateBackButton = findViewById(R.id.navigate_back)
+        clearButton = findViewById(R.id.clearIcon)
+        recycler = findViewById(R.id.recyclerView)
+        placeholder = findViewById(R.id.placeholder)
+        placeholderText = findViewById(R.id.placeholderText)
+
+        adapter.tracks = tracks
+
+        recycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        recycler.adapter = adapter
 
         clearButton.setOnClickListener {
             inputEditText.setText("")
 
+            tracks.clear()
+            adapter.notifyDataSetChanged()
+
+            placeholder.visibility = View.GONE
+            placeholderText.visibility = View.GONE
+
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(inputEditText.windowToken, 0)
+        }
+
+        inputEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                iTunesService.search(inputEditText.text.toString())
+                    .enqueue(object : Callback<TracksResponse> {
+                        override fun onResponse(
+                            call: Call<TracksResponse>,
+                            response: Response<TracksResponse>
+                        ) {
+                            when (response.code()) {
+                                200 -> {
+                                    if (response.body()?.tracks?.isNotEmpty() == true) {
+                                        tracks.clear()
+                                        tracks.addAll(response.body()?.tracks!!)
+                                        adapter.notifyDataSetChanged()
+                                    } else {
+                                        placeholder.visibility = View.VISIBLE
+                                        placeholderText.visibility = View.VISIBLE
+                                    }
+                                }
+
+                                else -> {
+
+                                }
+                            }
+                        }
+
+                        override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
+                            TODO("Not yet implemented")
+                        }
+
+                    })
+            }
+            false
         }
 
         navigateBackButton.setOnClickListener {
@@ -78,6 +152,10 @@ class SearchActivity : AppCompatActivity() {
 
         savedText = savedInstanceState.getString(INPUT_TEXT, INPUT_TEXT_DEF)
         inputEditText.setText(savedText)
+    }
+
+    private fun search() {
+
     }
 
     companion object {
