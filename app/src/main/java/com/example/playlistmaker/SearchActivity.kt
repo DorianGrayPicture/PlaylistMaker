@@ -37,6 +37,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var clearButton: ImageView
     private lateinit var recycler: RecyclerView
     private lateinit var nothingFoundPlaceholderImage: ImageView
+    private lateinit var networkErrorPlaceholderImage: ImageView
     private lateinit var placeholderText: TextView
 
     private val tracks = ArrayList<Track>()
@@ -53,6 +54,7 @@ class SearchActivity : AppCompatActivity() {
         clearButton = findViewById(R.id.clearIcon)
         recycler = findViewById(R.id.recyclerView)
         nothingFoundPlaceholderImage = findViewById(R.id.nothingFoundPlaceholderImage)
+        networkErrorPlaceholderImage = findViewById(R.id.networkErrorPlaceholderImage)
         placeholderText = findViewById(R.id.placeholderText)
 
         adapter.tracks = tracks
@@ -63,11 +65,13 @@ class SearchActivity : AppCompatActivity() {
         clearButton.setOnClickListener {
             inputEditText.setText("")
 
+
             tracks.clear()
             adapter.notifyDataSetChanged()
 
+            placeholderText.text = ""
             nothingFoundPlaceholderImage.visibility = View.GONE
-            placeholderText.visibility = View.GONE
+            networkErrorPlaceholderImage.visibility = View.GONE
 
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(inputEditText.windowToken, 0)
@@ -75,7 +79,10 @@ class SearchActivity : AppCompatActivity() {
 
         inputEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
+                placeholderText.text = ""
                 tracks.clear()
+                nothingFoundPlaceholderImage.visibility = View.GONE
+                nothingFoundPlaceholderImage.visibility = View.GONE
 
                 iTunesService.search(inputEditText.text.toString())
                     .enqueue(object : Callback<TracksResponse> {
@@ -96,6 +103,7 @@ class SearchActivity : AppCompatActivity() {
                                 }
 
                                 else -> {
+                                    networkErrorPlaceholderImage.visibility = View.VISIBLE
                                     placeholderText.text =
                                         "Проблемы со связью\n\nЗагрузка не удалась. Проверьте подключение к интернету"
                                 }
@@ -103,6 +111,7 @@ class SearchActivity : AppCompatActivity() {
                         }
 
                         override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
+                            networkErrorPlaceholderImage.visibility = View.VISIBLE
                             placeholderText.text =
                                 "Проблемы со связью\n\nЗагрузка не удалась. Проверьте подключение к интернету"
                         }
@@ -154,10 +163,6 @@ class SearchActivity : AppCompatActivity() {
 
         savedText = savedInstanceState.getString(INPUT_TEXT, INPUT_TEXT_DEF)
         inputEditText.setText(savedText)
-    }
-
-    private fun search() {
-
     }
 
     companion object {
