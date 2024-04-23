@@ -13,7 +13,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import retrofit2.Call
@@ -37,7 +36,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var navigateBackButton: ImageView
     private lateinit var clearButton: ImageView
     private lateinit var recycler: RecyclerView
-    private lateinit var placeholder: ImageView
+    private lateinit var nothingFoundPlaceholderImage: ImageView
     private lateinit var placeholderText: TextView
 
     private val tracks = ArrayList<Track>()
@@ -53,7 +52,7 @@ class SearchActivity : AppCompatActivity() {
         navigateBackButton = findViewById(R.id.navigate_back)
         clearButton = findViewById(R.id.clearIcon)
         recycler = findViewById(R.id.recyclerView)
-        placeholder = findViewById(R.id.placeholder)
+        nothingFoundPlaceholderImage = findViewById(R.id.nothingFoundPlaceholderImage)
         placeholderText = findViewById(R.id.placeholderText)
 
         adapter.tracks = tracks
@@ -67,7 +66,7 @@ class SearchActivity : AppCompatActivity() {
             tracks.clear()
             adapter.notifyDataSetChanged()
 
-            placeholder.visibility = View.GONE
+            nothingFoundPlaceholderImage.visibility = View.GONE
             placeholderText.visibility = View.GONE
 
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -76,6 +75,8 @@ class SearchActivity : AppCompatActivity() {
 
         inputEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
+                tracks.clear()
+
                 iTunesService.search(inputEditText.text.toString())
                     .enqueue(object : Callback<TracksResponse> {
                         override fun onResponse(
@@ -89,21 +90,22 @@ class SearchActivity : AppCompatActivity() {
                                         tracks.addAll(response.body()?.tracks!!)
                                         adapter.notifyDataSetChanged()
                                     } else {
-                                        placeholder.visibility = View.VISIBLE
-                                        placeholderText.visibility = View.VISIBLE
+                                        placeholderText.setText(R.string.nothing_found)
+                                        nothingFoundPlaceholderImage.visibility = View.VISIBLE
                                     }
                                 }
 
                                 else -> {
-
+                                    placeholderText.text =
+                                        "Проблемы со связью\n\nЗагрузка не удалась. Проверьте подключение к интернету"
                                 }
                             }
                         }
 
                         override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
-                            TODO("Not yet implemented")
+                            placeholderText.text =
+                                "Проблемы со связью\n\nЗагрузка не удалась. Проверьте подключение к интернету"
                         }
-
                     })
             }
             false
