@@ -80,8 +80,4 @@
     <style name="ArrowForwardIcon">
         <item name="android:src">@drawable/ic_arrow_forward_night</item>
     </style>
-
-    <style name="NothingFoundPlaceholder">
-        <item name="android:src">@drawable/ic_nothing_found_placeholder_night</item>
-    </style>
 </resources>

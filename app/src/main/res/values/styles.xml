@@ -101,8 +101,4 @@
     <style name="ArrowForwardIcon">
         <item name="android:src">@drawable/ic_arrow_forward</item>
     </style>
-
-    <style name="NothingFoundPlaceholder">
-        <item name="android:src">@drawable/ic_nothing_found_placeholder</item>
-    </style>
 </resources>
