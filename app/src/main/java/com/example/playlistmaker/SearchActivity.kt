@@ -10,9 +10,11 @@ import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import retrofit2.Call
@@ -38,6 +40,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var recycler: RecyclerView
     private lateinit var placeholderImage: ImageView
     private lateinit var placeholderText: TextView
+    private lateinit var refreshButton: ImageView
 
     private val tracks = ArrayList<Track>()
 
@@ -54,6 +57,7 @@ class SearchActivity : AppCompatActivity() {
         recycler = findViewById(R.id.recyclerView)
         placeholderImage = findViewById(R.id.placeholderImage)
         placeholderText = findViewById(R.id.placeholderText)
+        refreshButton = findViewById(R.id.refreshButton)
 
         adapter.tracks = tracks
 
@@ -62,58 +66,22 @@ class SearchActivity : AppCompatActivity() {
 
         clearButton.setOnClickListener {
             inputEditText.setText("")
+
             tracks.clear()
-
-            adapter.notifyDataSetChanged()
-
             placeholderText.text = ""
-            placeholderImage.visibility = View.GONE
+            placeholderImage.visibility = View.INVISIBLE
 
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(inputEditText.windowToken, 0)
         }
 
+        refreshButton.setOnClickListener {
+            search()
+        }
+
         inputEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                tracks.clear()
-                placeholderText.text = ""
-                placeholderImage.visibility = View.INVISIBLE
-
-                iTunesService.search(inputEditText.text.toString())
-                    .enqueue(object : Callback<TracksResponse> {
-                        override fun onResponse(
-                            call: Call<TracksResponse>,
-                            response: Response<TracksResponse>
-                        ) {
-                            when (response.code()) {
-                                200 -> {
-                                    tracks.clear()
-                                    if (response.body()?.tracks?.isNotEmpty() == true) {
-                                        tracks.addAll(response.body()?.tracks!!)
-                                        adapter.notifyDataSetChanged()
-                                    } else {
-                                        placeholderImage.setImageResource(R.drawable.ic_nothing_found_placeholder)
-                                        placeholderImage.visibility = View.VISIBLE
-                                        placeholderText.text = "Ничего не нашлось"
-                                    }
-                                }
-
-                                else -> {
-                                    placeholderImage.setImageResource(R.drawable.ic_network_error_placeholder)
-                                    placeholderImage.visibility = View.VISIBLE
-                                    placeholderText.text =
-                                        "Проблемы со связью\n\nЗагрузка не удалась. Проверьте подключение к интернету"
-                                }
-                            }
-                        }
-
-                        override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
-                            placeholderImage.setImageResource(R.drawable.ic_network_error_placeholder)
-                            placeholderImage.visibility = View.VISIBLE
-                            placeholderText.text =
-                                "Проблемы со связью\n\nЗагрузка не удалась. Проверьте подключение к интернету"
-                        }
-                    })
+                search()
             }
             false
         }
@@ -161,6 +129,50 @@ class SearchActivity : AppCompatActivity() {
 
         savedText = savedInstanceState.getString(INPUT_TEXT, INPUT_TEXT_DEF)
         inputEditText.setText(savedText)
+    }
+
+    private fun search() {
+        tracks.clear()
+        placeholderText.text = ""
+        placeholderImage.visibility = View.INVISIBLE
+        refreshButton.visibility = View.INVISIBLE
+
+        iTunesService.search(inputEditText.text.toString())
+            .enqueue(object : Callback<TracksResponse> {
+                override fun onResponse(
+                    call: Call<TracksResponse>,
+                    response: Response<TracksResponse>
+                ) {
+                    when (response.code()) {
+                        200 -> {
+                            if (response.body()?.tracks?.isNotEmpty() == true) {
+                                tracks.addAll(response.body()?.tracks!!)
+                                adapter.notifyDataSetChanged()
+                            } else {
+                                placeholderImage.setImageResource(R.drawable.ic_nothing_found_placeholder)
+                                placeholderImage.visibility = View.VISIBLE
+                                placeholderText.text = "Ничего не нашлось"
+                            }
+                        }
+
+                        else -> {
+                            placeholderImage.setImageResource(R.drawable.ic_network_error_placeholder)
+                            placeholderImage.visibility = View.VISIBLE
+                            refreshButton.visibility = View.VISIBLE
+                            placeholderText.text =
+                                "Проблемы со связью\n\nЗагрузка не удалась. Проверьте подключение к интернету"
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
+                    placeholderImage.setImageResource(R.drawable.ic_network_error_placeholder)
+                    placeholderImage.visibility = View.VISIBLE
+                    refreshButton.visibility = View.VISIBLE
+                    placeholderText.text =
+                        "Проблемы со связью\n\nЗагрузка не удалась. Проверьте подключение к интернету"
+                }
+            })
     }
 
     companion object {
