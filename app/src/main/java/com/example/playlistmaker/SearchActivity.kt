@@ -1,7 +1,5 @@
 package com.example.playlistmaker
 
-import Track
-import TracksResponse
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
