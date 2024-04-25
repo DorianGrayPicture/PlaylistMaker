@@ -10,11 +10,11 @@ import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import retrofit2.Call
@@ -68,8 +68,8 @@ class SearchActivity : AppCompatActivity() {
             inputEditText.setText("")
 
             tracks.clear()
-            placeholderText.text = ""
-            placeholderImage.visibility = View.INVISIBLE
+            adapter.notifyDataSetChanged()
+            hidePlaceholders()
 
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(inputEditText.windowToken, 0)
@@ -81,7 +81,9 @@ class SearchActivity : AppCompatActivity() {
 
         inputEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                search()
+                if (inputEditText.text.isNotEmpty()) {
+                    search()
+                }
             }
             false
         }
@@ -133,9 +135,7 @@ class SearchActivity : AppCompatActivity() {
 
     private fun search() {
         tracks.clear()
-        placeholderText.text = ""
-        placeholderImage.visibility = View.INVISIBLE
-        refreshButton.visibility = View.INVISIBLE
+        hidePlaceholders()
 
         iTunesService.search(inputEditText.text.toString())
             .enqueue(object : Callback<TracksResponse> {
@@ -149,31 +149,45 @@ class SearchActivity : AppCompatActivity() {
                                 tracks.addAll(response.body()?.tracks!!)
                                 adapter.notifyDataSetChanged()
                             } else {
-                                placeholderImage.setImageResource(R.drawable.ic_nothing_found_placeholder)
-                                placeholderImage.visibility = View.VISIBLE
-                                placeholderText.text = "Ничего не нашлось"
+                                showPlaceholders(
+                                    R.string.nothing_found_placeholder_text,
+                                    R.drawable.ic_nothing_found_placeholder
+                                )
                             }
                         }
 
                         else -> {
-                            placeholderImage.setImageResource(R.drawable.ic_network_error_placeholder)
-                            placeholderImage.visibility = View.VISIBLE
+                            showPlaceholders(
+                                R.string.network_error_placeholder_text,
+                                R.drawable.ic_network_error_placeholder
+                            )
                             refreshButton.visibility = View.VISIBLE
-                            placeholderText.text =
-                                "Проблемы со связью\n\nЗагрузка не удалась. Проверьте подключение к интернету"
                         }
                     }
                 }
 
                 override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
-                    placeholderImage.setImageResource(R.drawable.ic_network_error_placeholder)
-                    placeholderImage.visibility = View.VISIBLE
+                    showPlaceholders(
+                        R.string.network_error_placeholder_text,
+                        R.drawable.ic_network_error_placeholder
+                    )
                     refreshButton.visibility = View.VISIBLE
-                    placeholderText.text =
-                        "Проблемы со связью\n\nЗагрузка не удалась. Проверьте подключение к интернету"
                 }
             })
     }
+
+    private fun showPlaceholders(@StringRes text: Int, @DrawableRes image: Int) {
+        placeholderImage.setImageResource(image)
+        placeholderImage.visibility = View.VISIBLE
+        placeholderText.setText(text)
+    }
+
+    private fun hidePlaceholders() {
+        placeholderText.text = ""
+        placeholderImage.visibility = View.INVISIBLE
+        refreshButton.visibility = View.INVISIBLE
+    }
+
 
     companion object {
         const val INPUT_TEXT = "INPUT_TEXT"
