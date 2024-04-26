@@ -38,7 +38,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var recycler: RecyclerView
     private lateinit var placeholderImage: ImageView
     private lateinit var placeholderText: TextView
-    private lateinit var refreshButton: ImageView
+    private lateinit var refreshButton: TextView
 
     private val tracks = ArrayList<Track>()
 

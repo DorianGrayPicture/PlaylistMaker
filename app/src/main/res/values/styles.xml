@@ -87,7 +87,15 @@
     </style>
 
     <style name="RefreshButton">
-        <item name="android:src">@drawable/refresh_button_light</item>
+        <item name="android:background">@drawable/refresh_button_light</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:layout_marginTop">14dp</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="ClearIcon">

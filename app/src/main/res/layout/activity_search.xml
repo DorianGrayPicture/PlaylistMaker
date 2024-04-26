@@ -87,20 +87,12 @@
                 android:id="@+id/placeholderText"
                 style="@style/NothingFoundPlaceholderText" />
 
-            <ImageView
+            <TextView
                 android:id="@+id/refreshButton"
                 style="@style/RefreshButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="24dp"
-                android:visibility="invisible">
-
-            </ImageView>
-
+                android:text="@string/refresh_button_text"
+                android:visibility="invisible" />
 
         </LinearLayout>
-
-
     </FrameLayout>
 </LinearLayout>
