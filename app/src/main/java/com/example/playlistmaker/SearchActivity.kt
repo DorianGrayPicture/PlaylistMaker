@@ -40,7 +40,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var placeholderText: TextView
     private lateinit var refreshButton: TextView
 
-    private val tracks = ArrayList<Track>()
+    //private val tracks = ArrayList<Track>()
 
     private val adapter = TrackAdapter()
 
@@ -57,15 +57,13 @@ class SearchActivity : AppCompatActivity() {
         placeholderText = findViewById(R.id.placeholderText)
         refreshButton = findViewById(R.id.refreshButton)
 
-        adapter.tracks = tracks
-
         recycler.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         recycler.adapter = adapter
 
         clearButton.setOnClickListener {
             inputEditText.setText("")
 
-            tracks.clear()
+            adapter.tracks.clear()
             adapter.notifyDataSetChanged()
             hidePlaceholders()
 
@@ -132,7 +130,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun search() {
-        tracks.clear()
+        adapter.tracks.clear()
         hidePlaceholders()
 
         iTunesService.search(inputEditText.text.toString())
@@ -144,7 +142,7 @@ class SearchActivity : AppCompatActivity() {
                     when (response.code()) {
                         200 -> {
                             if (response.body()?.tracks?.isNotEmpty() == true) {
-                                tracks.addAll(response.body()?.tracks!!)
+                                adapter.tracks.addAll(response.body()?.tracks!!)
                                 adapter.notifyDataSetChanged()
                             } else {
                                 showPlaceholders(
