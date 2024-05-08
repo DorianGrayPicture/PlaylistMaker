@@ -1,10 +1,13 @@
 package com.example.playlistmaker
 
 import android.content.Context
+import android.content.SharedPreferences
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -16,6 +19,8 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
+import org.jetbrains.annotations.TestOnly
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -23,6 +28,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 const val SEARCH_HISTORY_PREFERENCE = "search_history_preference"
+
+const val TRACK_LIST_KEY = "key_for_track_list"
 
 class SearchActivity : AppCompatActivity() {
 
@@ -43,9 +50,29 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var placeholderText: TextView
     private lateinit var refreshButton: TextView
     private lateinit var historyListRecycler: RecyclerView
+    private lateinit var clearHistoryButton: TextView
+    private lateinit var placeholderHistory: LinearLayout
 
-    private val tracksListAdapter = TrackAdapter()
-    private val historyListAdapter = TrackAdapter()
+    private lateinit var sharedPreferences: SharedPreferences
+
+    val tracksListAdapter = TrackAdapter {
+        testClick(it)
+    }
+
+    val tracksHistoryAdapter = TrackAdapter {
+
+    }
+
+    private fun testClick(track: Track) {
+        if (tracksHistoryAdapter.tracks.contains(track)) {
+            tracksHistoryAdapter.tracks.remove(track)
+            tracksHistoryAdapter.tracks.add(0, track)
+            tracksHistoryAdapter.notifyItemInserted(0)
+        } else {
+            tracksHistoryAdapter.tracks.add(0, track)
+            tracksHistoryAdapter.notifyItemInserted(0)
+        }
+    }
 
     private var savedText = INPUT_TEXT_DEF
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,15 +86,24 @@ class SearchActivity : AppCompatActivity() {
         placeholderImage = findViewById(R.id.placeholderImage)
         placeholderText = findViewById(R.id.placeholderText)
         refreshButton = findViewById(R.id.refreshButton)
+        historyListRecycler = findViewById(R.id.historyRecycler)
+        clearHistoryButton = findViewById(R.id.clearHistory)
+        placeholderHistory = findViewById(R.id.searchHistory)
 
-        val placeholderHistory = findViewById<LinearLayout>(R.id.searchHistory)
+        sharedPreferences = getSharedPreferences(SEARCH_HISTORY_PREFERENCE, MODE_PRIVATE)
 
         tracksListRecycler.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         tracksListRecycler.adapter = tracksListAdapter
 
-        val sharedPreferences = getSharedPreferences(SEARCH_HISTORY_PREFERENCE, MODE_PRIVATE)
-        val searchHistory: SearchHistory = SearchHistory(sharedPreferences)
+        historyListRecycler.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        historyListRecycler.adapter = tracksHistoryAdapter
+
+        val savedTracks = sharedPreferences.getString(TRACK_LIST_KEY, null)
+        if (savedTracks != null) {
+            tracksHistoryAdapter.tracks = createTrackListFromJson(savedTracks)
+        }
 
         clearButton.setOnClickListener {
             inputEditText.setText("")
@@ -78,6 +114,13 @@ class SearchActivity : AppCompatActivity() {
 
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(inputEditText.windowToken, 0)
+        }
+
+        clearHistoryButton.setOnClickListener {
+            tracksHistoryAdapter.tracks.clear()
+            tracksHistoryAdapter.notifyDataSetChanged()
+
+            placeholderHistory.visibility = View.GONE
         }
 
         refreshButton.setOnClickListener {
@@ -95,7 +138,7 @@ class SearchActivity : AppCompatActivity() {
 
         inputEditText.setOnFocusChangeListener { view, hasFocus ->
             placeholderHistory.visibility =
-                if (hasFocus && inputEditText.text.isEmpty()) View.VISIBLE else View.GONE
+                if (hasFocus && inputEditText.text.isEmpty() && tracksHistoryAdapter.tracks.isNotEmpty()) View.VISIBLE else View.GONE
         }
 
         navigateBackButton.setOnClickListener {
@@ -112,7 +155,7 @@ class SearchActivity : AppCompatActivity() {
                 savedText = s.toString()
 
                 placeholderHistory.visibility =
-                    if (inputEditText.hasFocus() && s?.isEmpty() == true) View.VISIBLE else View.GONE
+                    if (inputEditText.hasFocus() && s?.isEmpty() == true && tracksHistoryAdapter.tracks.isNotEmpty()) View.VISIBLE else View.GONE
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -125,6 +168,7 @@ class SearchActivity : AppCompatActivity() {
 
     private fun clearButtonVisibility(s: CharSequence?): Int {
         return if (s.isNullOrEmpty()) {
+            4
             View.GONE
         } else {
             View.VISIBLE
@@ -201,6 +245,24 @@ class SearchActivity : AppCompatActivity() {
         refreshButton.visibility = View.GONE
     }
 
+    private fun createJsonFromTrackList(tracks: MutableList<Track>): String {
+        return Gson().toJson(tracks)
+    }
+
+    private fun createTrackListFromJson(json: String): MutableList<Track> {
+        return Gson().fromJson(json, Array<Track>::class.java).toMutableList()
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        Log.d("TAG", "onStop")
+        Log.d("TAG", createJsonFromTrackList(tracksHistoryAdapter.tracks))
+
+        sharedPreferences.edit()
+            .putString(TRACK_LIST_KEY, createJsonFromTrackList(tracksHistoryAdapter.tracks))
+            .apply()
+    }
 
     companion object {
         const val INPUT_TEXT = "INPUT_TEXT"
