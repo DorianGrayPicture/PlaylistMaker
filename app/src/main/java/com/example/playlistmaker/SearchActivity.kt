@@ -2,7 +2,6 @@ package com.example.playlistmaker
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -20,16 +19,11 @@ import androidx.annotation.StringRes
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import org.jetbrains.annotations.TestOnly
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-
-const val SEARCH_HISTORY_PREFERENCE = "search_history_preference"
-
-const val TRACK_LIST_KEY = "key_for_track_list"
 
 class SearchActivity : AppCompatActivity() {
 
@@ -168,7 +162,6 @@ class SearchActivity : AppCompatActivity() {
 
     private fun clearButtonVisibility(s: CharSequence?): Int {
         return if (s.isNullOrEmpty()) {
-            4
             View.GONE
         } else {
             View.VISIBLE
@@ -267,5 +260,8 @@ class SearchActivity : AppCompatActivity() {
     companion object {
         const val INPUT_TEXT = "INPUT_TEXT"
         const val INPUT_TEXT_DEF = ""
+
+        const val SEARCH_HISTORY_PREFERENCE = "search_history_preference"
+        const val TRACK_LIST_KEY = "key_for_track_list"
     }
 }
