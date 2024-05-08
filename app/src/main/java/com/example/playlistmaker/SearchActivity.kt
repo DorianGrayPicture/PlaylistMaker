@@ -50,21 +50,26 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var sharedPreferences: SharedPreferences
 
     val tracksListAdapter = TrackAdapter {
-        testClick(it)
+        addTrack(it)
     }
 
     val tracksHistoryAdapter = TrackAdapter {
 
     }
 
-    private fun testClick(track: Track) {
+    private fun addTrack(track: Track) {
         if (tracksHistoryAdapter.tracks.contains(track)) {
             tracksHistoryAdapter.tracks.remove(track)
             tracksHistoryAdapter.tracks.add(0, track)
             tracksHistoryAdapter.notifyItemInserted(0)
-        } else {
+            return
+        }
+        if (tracksHistoryAdapter.tracks.size < 10) {
             tracksHistoryAdapter.tracks.add(0, track)
             tracksHistoryAdapter.notifyItemInserted(0)
+        } else {
+            tracksHistoryAdapter.tracks.removeAt(tracksHistoryAdapter.tracks.size + 1)
+            tracksHistoryAdapter.tracks.add(0, track)
         }
     }
 
