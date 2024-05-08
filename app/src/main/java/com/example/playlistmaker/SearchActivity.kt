@@ -59,17 +59,19 @@ class SearchActivity : AppCompatActivity() {
 
     private fun addTrack(track: Track) {
         if (tracksHistoryAdapter.tracks.contains(track)) {
-            tracksHistoryAdapter.tracks.remove(track)
+            Log.d("TAG", "${track.trackName} is in the list")
+            tracksHistoryAdapter.tracks.removeAt(tracksHistoryAdapter.tracks.indexOf(track))
             tracksHistoryAdapter.tracks.add(0, track)
-            tracksHistoryAdapter.notifyItemInserted(0)
+            tracksHistoryAdapter.notifyDataSetChanged()
             return
         }
         if (tracksHistoryAdapter.tracks.size < 10) {
             tracksHistoryAdapter.tracks.add(0, track)
             tracksHistoryAdapter.notifyItemInserted(0)
         } else {
-            tracksHistoryAdapter.tracks.removeAt(tracksHistoryAdapter.tracks.size + 1)
+            tracksHistoryAdapter.tracks.removeAt(tracksHistoryAdapter.tracks.lastIndex)
             tracksHistoryAdapter.tracks.add(0, track)
+            tracksHistoryAdapter.notifyDataSetChanged()
         }
     }
 
