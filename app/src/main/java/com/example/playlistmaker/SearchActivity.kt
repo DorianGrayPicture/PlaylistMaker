@@ -2,6 +2,7 @@ package com.example.playlistmaker
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -58,21 +59,27 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun addTrack(track: Track) {
-        if (tracksHistoryAdapter.tracks.contains(track)) {
-            Log.d("TAG", "${track.trackName} is in the list")
-            tracksHistoryAdapter.tracks.removeAt(tracksHistoryAdapter.tracks.indexOf(track))
-            tracksHistoryAdapter.tracks.add(0, track)
-            tracksHistoryAdapter.notifyDataSetChanged()
-            return
-        }
-        if (tracksHistoryAdapter.tracks.size < 10) {
-            tracksHistoryAdapter.tracks.add(0, track)
-            tracksHistoryAdapter.notifyItemInserted(0)
+        val tracksJson = sharedPreferences.getString(TRACK_LIST_KEY, null)
+
+        if (tracksJson != null) {
+            if (track.trackId.toString() in tracksJson) {
+                tracksHistoryAdapter.tracks.remove(track)
+                tracksHistoryAdapter.tracks.add(0, track)
+            } else if (tracksHistoryAdapter.tracks.size == 10) {
+                tracksHistoryAdapter.tracks.removeAt(tracksHistoryAdapter.tracks.lastIndex)
+                tracksHistoryAdapter.tracks.add(0, track)
+            } else {
+                tracksHistoryAdapter.tracks.add(0, track)
+            }
         } else {
-            tracksHistoryAdapter.tracks.removeAt(tracksHistoryAdapter.tracks.lastIndex)
-            tracksHistoryAdapter.tracks.add(0, track)
-            tracksHistoryAdapter.notifyDataSetChanged()
+            tracksHistoryAdapter.tracks.add(track)
         }
+
+        tracksHistoryAdapter.notifyDataSetChanged()
+
+        sharedPreferences.edit()
+            .putString(TRACK_LIST_KEY, createJsonFromTrackList(tracksHistoryAdapter.tracks))
+            .apply()
     }
 
     private var savedText = INPUT_TEXT_DEF
@@ -93,6 +100,11 @@ class SearchActivity : AppCompatActivity() {
 
         sharedPreferences = getSharedPreferences(SEARCH_HISTORY_PREFERENCE, MODE_PRIVATE)
 
+        val savedTracks = sharedPreferences.getString(TRACK_LIST_KEY, null)
+        if (savedTracks != null) {
+            tracksHistoryAdapter.tracks = createTrackListFromJson(savedTracks)
+        }
+
         tracksListRecycler.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         tracksListRecycler.adapter = tracksListAdapter
@@ -100,11 +112,6 @@ class SearchActivity : AppCompatActivity() {
         historyListRecycler.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         historyListRecycler.adapter = tracksHistoryAdapter
-
-        val savedTracks = sharedPreferences.getString(TRACK_LIST_KEY, null)
-        if (savedTracks != null) {
-            tracksHistoryAdapter.tracks = createTrackListFromJson(savedTracks)
-        }
 
         clearButton.setOnClickListener {
             inputEditText.setText("")
@@ -120,6 +127,7 @@ class SearchActivity : AppCompatActivity() {
         clearHistoryButton.setOnClickListener {
             tracksHistoryAdapter.tracks.clear()
             tracksHistoryAdapter.notifyDataSetChanged()
+            sharedPreferences.edit().remove(TRACK_LIST_KEY).apply()
 
             placeholderHistory.visibility = View.GONE
         }
@@ -245,6 +253,14 @@ class SearchActivity : AppCompatActivity() {
         refreshButton.visibility = View.GONE
     }
 
+    private fun createJsonFromTrack(track: Track): String {
+        return Gson().toJson(track)
+    }
+
+    private fun createTrackFromJson(json: String): Track {
+        return Gson().fromJson(json, Track::class.java)
+    }
+
     private fun createJsonFromTrackList(tracks: MutableList<Track>): String {
         return Gson().toJson(tracks)
     }
@@ -270,5 +286,6 @@ class SearchActivity : AppCompatActivity() {
 
         const val SEARCH_HISTORY_PREFERENCE = "search_history_preference"
         const val TRACK_LIST_KEY = "key_for_track_list"
+        const val TRACK_KEY = "key_for_track"
     }
 }
