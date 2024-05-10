@@ -2,7 +2,6 @@ package com.example.playlistmaker
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -253,14 +252,6 @@ class SearchActivity : AppCompatActivity() {
         refreshButton.visibility = View.GONE
     }
 
-    private fun createJsonFromTrack(track: Track): String {
-        return Gson().toJson(track)
-    }
-
-    private fun createTrackFromJson(json: String): Track {
-        return Gson().fromJson(json, Track::class.java)
-    }
-
     private fun createJsonFromTrackList(tracks: MutableList<Track>): String {
         return Gson().toJson(tracks)
     }
@@ -286,6 +277,5 @@ class SearchActivity : AppCompatActivity() {
 
         const val SEARCH_HISTORY_PREFERENCE = "search_history_preference"
         const val TRACK_LIST_KEY = "key_for_track_list"
-        const val TRACK_KEY = "key_for_track"
     }
 }
