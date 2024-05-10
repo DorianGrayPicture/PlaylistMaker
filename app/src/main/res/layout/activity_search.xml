@@ -42,7 +42,9 @@
             style="@style/SearchField"
             android:layout_width="match_parent"
             android:layout_height="36dp"
+            android:imeOptions="actionDone"
             android:inputType="text"
+            android:singleLine="true"
             android:textCursorDrawable="@drawable/custom_cursor">
 
         </EditText>
@@ -59,8 +61,46 @@
             android:visibility="gone" />
     </RelativeLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/placeholderImage"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="102dp"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/placeholderText"
+                style="@style/NothingFoundPlaceholderText" />
+
+            <ImageView
+                android:id="@+id/refreshButton"
+                style="@style/RefreshButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="24dp"
+                android:visibility="invisible">
+
+            </ImageView>
+
+
+        </LinearLayout>
+
+
+    </FrameLayout>
 </LinearLayout>

@@ -75,6 +75,21 @@
         <item name="android:ellipsize">end</item>
     </style>
 
+    <style name="NothingFoundPlaceholderText">
+        <item name="android:layout_marginHorizontal">24dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">19sp</item>
+    </style>
+
+    <style name="RefreshButton">
+        <item name="android:src">@drawable/refresh_button_light</item>
+    </style>
+
     <style name="ClearIcon">
         <item name="android:src">@drawable/clear_icon</item>
     </style>

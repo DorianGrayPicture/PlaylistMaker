@@ -7,4 +7,5 @@
     <color name="query_hint_color">#AEAFB4</color>
     <color name="song_name_text_color">@color/black</color>
     <color name="song_info_text_color">#AEAFB4</color>
+    <color name="placeholder_image_color">#1A1B22</color>
 </resources>

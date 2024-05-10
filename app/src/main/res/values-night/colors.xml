@@ -2,4 +2,5 @@
 <resources>
     <color name="song_name_text_color">@color/white</color>
     <color name="song_info_text_color">@color/white</color>
+    <color name="placeholder_image_color">#ffffff</color>
 </resources>
