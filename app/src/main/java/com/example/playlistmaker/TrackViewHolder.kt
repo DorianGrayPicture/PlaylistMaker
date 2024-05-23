@@ -18,7 +18,7 @@ class TrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     init {
         trackNameView = itemView.findViewById(R.id.trackName)
         artistNameView = itemView.findViewById(R.id.artistName)
-        trackTimeView = itemView.findViewById(R.id.trackTime)
+        trackTimeView = itemView.findViewById(R.id.timerProgress)
         artworkView = itemView.findViewById(R.id.artwork)
     }
 
