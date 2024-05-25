@@ -71,6 +71,31 @@
             android:layout_height="match_parent" />
 
         <LinearLayout
+            android:id="@+id/searchHistory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/SearchHistoryText"
+                android:text="@string/search_history_text" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/historyRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/clearHistory"
+                style="@style/ClearHistoryButton"
+                android:layout_marginTop="24dp"
+                android:text="@string/clear_history_button_text" />
+        </LinearLayout>
+
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -81,26 +106,19 @@
                 android:layout_height="120dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="102dp"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="16dp"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/placeholderText"
                 style="@style/NothingFoundPlaceholderText" />
 
-            <ImageView
+            <TextView
                 android:id="@+id/refreshButton"
                 style="@style/RefreshButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="24dp"
-                android:visibility="invisible">
-
-            </ImageView>
-
+                android:text="@string/refresh_button_text"
+                android:visibility="invisible" />
 
         </LinearLayout>
-
-
     </FrameLayout>
 </LinearLayout>

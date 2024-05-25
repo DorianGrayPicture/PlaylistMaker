@@ -8,6 +8,10 @@ import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import com.google.android.material.switchmaterial.SwitchMaterial
+
+const val APP_STATE_PREFERENCES = "app_state_preference"
+const val SWITCHER_KEY = "key_for_switcher"
 
 class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,9 +22,21 @@ class SettingsActivity : AppCompatActivity() {
         val shareAppButton = findViewById<TextView>(R.id.share_app)
         val textToSupportButton = findViewById<TextView>(R.id.text_to_support)
         val openConsumerApplicationButton = findViewById<TextView>(R.id.consumer_application)
+        val themeSwitcher = findViewById<SwitchMaterial>(R.id.themeSwitcher)
+
+        val sharedPreferences = getSharedPreferences(APP_STATE_PREFERENCES, MODE_PRIVATE)
 
         navigateBackButton.setOnClickListener {
             finish()
+        }
+
+        themeSwitcher.isChecked = sharedPreferences.getBoolean(SWITCHER_KEY, false)
+        themeSwitcher.setOnCheckedChangeListener { switcher, checked ->
+            sharedPreferences.edit()
+                .putBoolean(SWITCHER_KEY, checked)
+                .apply()
+
+            (applicationContext as App).switchTheme(checked)
         }
 
         shareAppButton.setOnClickListener {
