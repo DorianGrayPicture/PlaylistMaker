@@ -5,6 +5,8 @@ import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -14,6 +16,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -32,6 +35,10 @@ class SearchActivity : AppCompatActivity() {
 
     private val iTunesBaseUrl = "https://itunes.apple.com"
 
+    private val mainThreadHandler = Handler(Looper.getMainLooper())
+
+    private val searchRunnable = Runnable { searchRequest() }
+
     private val retrofit = Retrofit.Builder()
         .baseUrl(iTunesBaseUrl)
         .addConverterFactory(GsonConverterFactory.create())
@@ -49,6 +56,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var historyListRecycler: RecyclerView
     private lateinit var clearHistoryButton: TextView
     private lateinit var placeholderHistory: LinearLayout
+    private lateinit var progressBar: ProgressBar
 
     private lateinit var sharedPreferences: SharedPreferences
 
@@ -121,6 +129,7 @@ class SearchActivity : AppCompatActivity() {
         historyListRecycler = findViewById(R.id.historyRecycler)
         clearHistoryButton = findViewById(R.id.clearHistory)
         placeholderHistory = findViewById(R.id.searchHistory)
+        progressBar = findViewById(R.id.progressBar)
 
         sharedPreferences = getSharedPreferences(SEARCH_HISTORY_PREFERENCE, MODE_PRIVATE)
 
@@ -157,19 +166,19 @@ class SearchActivity : AppCompatActivity() {
         }
 
         refreshButton.setOnClickListener {
-            search()
+            searchRequest()
         }
 
-        inputEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                if (inputEditText.text.isNotEmpty()) {
-                    search()
-                }
-            }
-            false
-        }
+//        inputEditText.setOnEditorActionListener { _, actionId, _ ->
+//            if (actionId == EditorInfo.IME_ACTION_DONE) {
+//                if (inputEditText.text.isNotEmpty()) {
+//                    searchRequest()
+//                }
+//            }
+//            false
+//        }
 
-        inputEditText.setOnFocusChangeListener { view, hasFocus ->
+        inputEditText.setOnFocusChangeListener { _, hasFocus ->
             placeholderHistory.visibility =
                 if (hasFocus && inputEditText.text.isEmpty() && tracksHistoryAdapter.tracks.isNotEmpty()) View.VISIBLE else View.GONE
         }
@@ -189,6 +198,10 @@ class SearchActivity : AppCompatActivity() {
 
                 placeholderHistory.visibility =
                     if (inputEditText.hasFocus() && s?.isEmpty() == true && tracksHistoryAdapter.tracks.isNotEmpty()) View.VISIBLE else View.GONE
+
+                if (inputEditText.text.isNotEmpty()) {
+                    searchDebounce()
+                }
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -197,6 +210,11 @@ class SearchActivity : AppCompatActivity() {
         }
 
         inputEditText.addTextChangedListener(textWatcher)
+    }
+
+    private fun searchDebounce() {
+        mainThreadHandler.removeCallbacks(searchRunnable)
+        mainThreadHandler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
     }
 
     private fun clearButtonVisibility(s: CharSequence?): Int {
@@ -222,9 +240,10 @@ class SearchActivity : AppCompatActivity() {
         inputEditText.setText(savedText)
     }
 
-    private fun search() {
-        tracksListAdapter.tracks.clear()
+    private fun searchRequest() {
         hidePlaceholders()
+        progressBar.visibility = View.VISIBLE
+        tracksListRecycler.visibility = View.GONE
 
         iTunesService.search(inputEditText.text.toString())
             .enqueue(object : Callback<TracksResponse> {
@@ -232,9 +251,11 @@ class SearchActivity : AppCompatActivity() {
                     call: Call<TracksResponse>,
                     response: Response<TracksResponse>
                 ) {
+                    progressBar.visibility = View.GONE
                     when (response.code()) {
                         200 -> {
                             if (response.body()?.tracks?.isNotEmpty() == true) {
+                                tracksListRecycler.visibility = View.VISIBLE
                                 tracksListAdapter.tracks.addAll(response.body()?.tracks!!)
                                 tracksListAdapter.notifyDataSetChanged()
                             } else {
@@ -311,5 +332,7 @@ class SearchActivity : AppCompatActivity() {
         const val KEY_FOR_PRIMARY_GENRE_NAME = "primary_genre_name"
         const val KEY_FOR_COUNTRY = "country"
         const val KEY_FOR_ARTWORK_URL = "art_work_url"
+
+        const val SEARCH_DEBOUNCE_DELAY = 500L
     }
 }
