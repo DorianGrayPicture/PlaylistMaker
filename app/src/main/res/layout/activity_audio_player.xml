@@ -91,6 +91,7 @@
         app:layout_constraintTop_toBottomOf="@id/artistName" />
 
     <ImageView
+        android:src="@drawable/button_play"
         android:id="@+id/playButton"
         style="@style/AudioPlayerPlayButton"
         android:layout_width="100dp"
