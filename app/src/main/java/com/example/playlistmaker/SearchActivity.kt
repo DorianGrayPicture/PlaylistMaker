@@ -35,8 +35,6 @@ class SearchActivity : AppCompatActivity() {
 
     private val iTunesBaseUrl = "https://itunes.apple.com"
 
-    private val mainThreadHandler = Handler(Looper.getMainLooper())
-
     private val searchRunnable = Runnable { searchRequest() }
 
     private val retrofit = Retrofit.Builder()
@@ -45,6 +43,12 @@ class SearchActivity : AppCompatActivity() {
         .build()
 
     private val iTunesService: ITunesApi = retrofit.create(ITunesApi::class.java)
+
+    private lateinit var sharedPreferences: SharedPreferences
+
+    private val mainThreadHandler = Handler(Looper.getMainLooper())
+
+    private var isClickAllowed = true
 
     private lateinit var inputEditText: EditText
     private lateinit var navigateBackButton: ImageView
@@ -58,15 +62,17 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var placeholderHistory: LinearLayout
     private lateinit var progressBar: ProgressBar
 
-    private lateinit var sharedPreferences: SharedPreferences
-
     val tracksListAdapter = TrackAdapter {
-        addTrack(it)
-        audioPlayerIntent(it)
+        if (clickDebounce()) {
+            addTrack(it)
+            audioPlayerIntent(it)
+        }
     }
 
     val tracksHistoryAdapter = TrackAdapter {
-        audioPlayerIntent(it)
+        if (clickDebounce()) {
+            audioPlayerIntent(it)
+        }
     }
 
     private fun addTrack(track: Track) {
@@ -192,7 +198,9 @@ class SearchActivity : AppCompatActivity() {
                 savedText = s.toString()
 
                 placeholderHistory.visibility =
-                    if (inputEditText.hasFocus() && s?.trim()?.isEmpty() == true && tracksHistoryAdapter.tracks.isNotEmpty()) View.VISIBLE else View.GONE
+                    if (inputEditText.hasFocus() && s?.trim()
+                            ?.isEmpty() == true && tracksHistoryAdapter.tracks.isNotEmpty()
+                    ) View.VISIBLE else View.GONE
 
                 searchDebounce()
             }
@@ -282,6 +290,16 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
+    private fun clickDebounce(): Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            mainThreadHandler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE)
+        }
+
+        return current
+    }
+
     private fun showPlaceholders(@StringRes text: Int, @DrawableRes image: Int) {
         placeholderImage.setImageResource(image)
         placeholderImage.visibility = View.VISIBLE
@@ -330,5 +348,6 @@ class SearchActivity : AppCompatActivity() {
         const val KEY_FOR_ARTWORK_URL = "art_work_url"
 
         const val SEARCH_DEBOUNCE_DELAY = 2000L
+        const val CLICK_DEBOUNCE = 1000L
     }
 }
