@@ -110,6 +110,7 @@ class AudioPlayerActivity : AppCompatActivity() {
             setOnCompletionListener {
                 playerState = STATE_PREPARED
                 timerProgressBar.text = "00:00"
+                playButton.setImageResource(R.drawable.button_play)
             }
         }
     }
