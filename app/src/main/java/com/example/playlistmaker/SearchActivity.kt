@@ -50,6 +50,8 @@ class SearchActivity : AppCompatActivity() {
 
     private var isClickAllowed = true
 
+    private var savedText = INPUT_TEXT_DEF
+
     private lateinit var inputEditText: EditText
     private lateinit var navigateBackButton: ImageView
     private lateinit var clearButton: ImageView
@@ -75,52 +77,6 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    private fun addTrack(track: Track) {
-        val tracksJson = sharedPreferences.getString(TRACK_LIST_KEY, null)
-
-        if (tracksJson != null) {
-            if (track.trackId.toString() in tracksJson) {
-                tracksHistoryAdapter.tracks.remove(track)
-                tracksHistoryAdapter.tracks.add(0, track)
-            } else if (tracksHistoryAdapter.tracks.size == 10) {
-                tracksHistoryAdapter.tracks.removeAt(tracksHistoryAdapter.tracks.lastIndex)
-                tracksHistoryAdapter.tracks.add(0, track)
-            } else {
-                tracksHistoryAdapter.tracks.add(0, track)
-            }
-        } else {
-            tracksHistoryAdapter.tracks.add(track)
-        }
-
-        tracksHistoryAdapter.notifyDataSetChanged()
-
-        sharedPreferences.edit()
-            .putString(TRACK_LIST_KEY, createJsonFromTrackList(tracksHistoryAdapter.tracks))
-            .apply()
-    }
-
-    private fun audioPlayerIntent(track: Track) {
-        val audioPlayerIntent = Intent(this@SearchActivity, AudioPlayerActivity::class.java)
-        audioPlayerIntent.apply {
-            putExtra(KEY_FOR_TRACK_NAME, track.trackName)
-            putExtra(KEY_FOR_ARTIST_NAME, track.artistName)
-            putExtra(
-                KEY_FOR_TRACK_TIME,
-                SimpleDateFormat("mm:ss", Locale.getDefault()).format(track.trackTimeMillis)
-            )
-            putExtra(KEY_FOR_COLLECTION_NAME, track.collectionName)
-            putExtra(KEY_FOR_RELEASE_DATE, track.releaseDate.slice(0..3))
-            putExtra(KEY_FOR_PRIMARY_GENRE_NAME, track.primaryGenreName)
-            putExtra(KEY_FOR_COUNTRY, track.country)
-            putExtra(
-                KEY_FOR_ARTWORK_URL,
-                track.artworkUrl100.replaceAfterLast('/', "512x512bb.jpg")
-            )
-        }
-        startActivity(audioPlayerIntent)
-    }
-
-    private var savedText = INPUT_TEXT_DEF
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
@@ -298,6 +254,51 @@ class SearchActivity : AppCompatActivity() {
         }
 
         return current
+    }
+
+    private fun addTrack(track: Track) {
+        val tracksJson = sharedPreferences.getString(TRACK_LIST_KEY, null)
+
+        if (tracksJson != null) {
+            if (track.trackId.toString() in tracksJson) {
+                tracksHistoryAdapter.tracks.remove(track)
+                tracksHistoryAdapter.tracks.add(0, track)
+            } else if (tracksHistoryAdapter.tracks.size == 10) {
+                tracksHistoryAdapter.tracks.removeAt(tracksHistoryAdapter.tracks.lastIndex)
+                tracksHistoryAdapter.tracks.add(0, track)
+            } else {
+                tracksHistoryAdapter.tracks.add(0, track)
+            }
+        } else {
+            tracksHistoryAdapter.tracks.add(track)
+        }
+
+        tracksHistoryAdapter.notifyDataSetChanged()
+
+        sharedPreferences.edit()
+            .putString(TRACK_LIST_KEY, createJsonFromTrackList(tracksHistoryAdapter.tracks))
+            .apply()
+    }
+
+    private fun audioPlayerIntent(track: Track) {
+        val audioPlayerIntent = Intent(this@SearchActivity, AudioPlayerActivity::class.java)
+        audioPlayerIntent.apply {
+            putExtra(KEY_FOR_TRACK_NAME, track.trackName)
+            putExtra(KEY_FOR_ARTIST_NAME, track.artistName)
+            putExtra(
+                KEY_FOR_TRACK_TIME,
+                SimpleDateFormat("mm:ss", Locale.getDefault()).format(track.trackTimeMillis)
+            )
+            putExtra(KEY_FOR_COLLECTION_NAME, track.collectionName)
+            putExtra(KEY_FOR_RELEASE_DATE, track.releaseDate.slice(0..3))
+            putExtra(KEY_FOR_PRIMARY_GENRE_NAME, track.primaryGenreName)
+            putExtra(KEY_FOR_COUNTRY, track.country)
+            putExtra(
+                KEY_FOR_ARTWORK_URL,
+                track.artworkUrl100.replaceAfterLast('/', "512x512bb.jpg")
+            )
+        }
+        startActivity(audioPlayerIntent)
     }
 
     private fun showPlaceholders(@StringRes text: Int, @DrawableRes image: Int) {
