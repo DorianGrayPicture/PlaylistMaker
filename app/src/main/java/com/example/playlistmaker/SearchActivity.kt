@@ -169,15 +169,6 @@ class SearchActivity : AppCompatActivity() {
             searchRequest()
         }
 
-//        inputEditText.setOnEditorActionListener { _, actionId, _ ->
-//            if (actionId == EditorInfo.IME_ACTION_DONE) {
-//                if (inputEditText.text.isNotEmpty()) {
-//                    searchRequest()
-//                }
-//            }
-//            false
-//        }
-
         inputEditText.setOnFocusChangeListener { _, hasFocus ->
             placeholderHistory.visibility =
                 if (hasFocus && inputEditText.text.isEmpty() && tracksHistoryAdapter.tracks.isNotEmpty()) View.VISIBLE else View.GONE
@@ -193,15 +184,17 @@ class SearchActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (inputEditText.text.trim().isEmpty()) {
+                    tracksListRecycler.visibility = View.GONE
+                }
+
                 clearButton.visibility = clearButtonVisibility(s)
                 savedText = s.toString()
 
                 placeholderHistory.visibility =
-                    if (inputEditText.hasFocus() && s?.isEmpty() == true && tracksHistoryAdapter.tracks.isNotEmpty()) View.VISIBLE else View.GONE
+                    if (inputEditText.hasFocus() && s?.trim()?.isEmpty() == true && tracksHistoryAdapter.tracks.isNotEmpty()) View.VISIBLE else View.GONE
 
-                if (inputEditText.text.isNotEmpty()) {
-                    searchDebounce()
-                }
+                searchDebounce()
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -241,49 +234,52 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun searchRequest() {
-        hidePlaceholders()
-        progressBar.visibility = View.VISIBLE
-        tracksListRecycler.visibility = View.GONE
+        if (inputEditText.text.trim().isNotEmpty()) {
+            hidePlaceholders()
+            progressBar.visibility = View.VISIBLE
+            tracksListRecycler.visibility = View.GONE
 
-        iTunesService.search(inputEditText.text.toString())
-            .enqueue(object : Callback<TracksResponse> {
-                override fun onResponse(
-                    call: Call<TracksResponse>,
-                    response: Response<TracksResponse>
-                ) {
-                    progressBar.visibility = View.GONE
-                    when (response.code()) {
-                        200 -> {
-                            if (response.body()?.tracks?.isNotEmpty() == true) {
-                                tracksListRecycler.visibility = View.VISIBLE
-                                tracksListAdapter.tracks.addAll(response.body()?.tracks!!)
-                                tracksListAdapter.notifyDataSetChanged()
-                            } else {
+            iTunesService.search(inputEditText.text.toString())
+                .enqueue(object : Callback<TracksResponse> {
+                    override fun onResponse(
+                        call: Call<TracksResponse>,
+                        response: Response<TracksResponse>
+                    ) {
+                        progressBar.visibility = View.GONE
+                        when (response.code()) {
+                            200 -> {
+                                tracksListAdapter.tracks.clear()
+                                if (response.body()?.tracks?.isNotEmpty() == true) {
+                                    tracksListRecycler.visibility = View.VISIBLE
+                                    tracksListAdapter.tracks.addAll(response.body()?.tracks!!)
+                                    tracksListAdapter.notifyDataSetChanged()
+                                } else {
+                                    showPlaceholders(
+                                        R.string.nothing_found_placeholder_text,
+                                        R.drawable.ic_nothing_found_placeholder
+                                    )
+                                }
+                            }
+
+                            else -> {
                                 showPlaceholders(
-                                    R.string.nothing_found_placeholder_text,
-                                    R.drawable.ic_nothing_found_placeholder
+                                    R.string.network_error_placeholder_text,
+                                    R.drawable.ic_network_error_placeholder
                                 )
+                                refreshButton.visibility = View.VISIBLE
                             }
                         }
-
-                        else -> {
-                            showPlaceholders(
-                                R.string.network_error_placeholder_text,
-                                R.drawable.ic_network_error_placeholder
-                            )
-                            refreshButton.visibility = View.VISIBLE
-                        }
                     }
-                }
 
-                override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
-                    showPlaceholders(
-                        R.string.network_error_placeholder_text,
-                        R.drawable.ic_network_error_placeholder
-                    )
-                    refreshButton.visibility = View.VISIBLE
-                }
-            })
+                    override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
+                        showPlaceholders(
+                            R.string.network_error_placeholder_text,
+                            R.drawable.ic_network_error_placeholder
+                        )
+                        refreshButton.visibility = View.VISIBLE
+                    }
+                })
+        }
     }
 
     private fun showPlaceholders(@StringRes text: Int, @DrawableRes image: Int) {
@@ -333,6 +329,6 @@ class SearchActivity : AppCompatActivity() {
         const val KEY_FOR_COUNTRY = "country"
         const val KEY_FOR_ARTWORK_URL = "art_work_url"
 
-        const val SEARCH_DEBOUNCE_DELAY = 500L
+        const val SEARCH_DEBOUNCE_DELAY = 2000L
     }
 }
