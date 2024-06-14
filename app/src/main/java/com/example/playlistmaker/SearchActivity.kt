@@ -11,7 +11,6 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
@@ -297,6 +296,7 @@ class SearchActivity : AppCompatActivity() {
                 KEY_FOR_ARTWORK_URL,
                 track.artworkUrl100.replaceAfterLast('/', "512x512bb.jpg")
             )
+            putExtra(KEY_FOR_PREVIEW_URL, track.previewUrl)
         }
         startActivity(audioPlayerIntent)
     }
@@ -324,9 +324,6 @@ class SearchActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
 
-        Log.d("TAG", "onStop")
-        Log.d("TAG", createJsonFromTrackList(tracksHistoryAdapter.tracks))
-
         sharedPreferences.edit()
             .putString(TRACK_LIST_KEY, createJsonFromTrackList(tracksHistoryAdapter.tracks))
             .apply()
@@ -347,6 +344,7 @@ class SearchActivity : AppCompatActivity() {
         const val KEY_FOR_PRIMARY_GENRE_NAME = "primary_genre_name"
         const val KEY_FOR_COUNTRY = "country"
         const val KEY_FOR_ARTWORK_URL = "art_work_url"
+        const val KEY_FOR_PREVIEW_URL = "preview_url"
 
         const val SEARCH_DEBOUNCE_DELAY = 2000L
         const val CLICK_DEBOUNCE = 1000L
