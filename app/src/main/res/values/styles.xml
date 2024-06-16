@@ -160,7 +160,7 @@
     </style>
 
     <style name="AudioPlayerPlayButton">
-        <item name="android:src">@drawable/button_play</item>
+        <item name="tint">#1A1B22</item>
     </style>
 
     <style name="AudioPlayerAddToFavoriteButton">
