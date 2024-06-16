@@ -1,6 +1,7 @@
 package com.example.playlistmaker
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -24,6 +25,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class SearchActivity : AppCompatActivity() {
 
@@ -51,10 +54,11 @@ class SearchActivity : AppCompatActivity() {
 
     val tracksListAdapter = TrackAdapter {
         addTrack(it)
+        audioPlayerIntent(it)
     }
 
     val tracksHistoryAdapter = TrackAdapter {
-
+        audioPlayerIntent(it)
     }
 
     private fun addTrack(track: Track) {
@@ -79,6 +83,27 @@ class SearchActivity : AppCompatActivity() {
         sharedPreferences.edit()
             .putString(TRACK_LIST_KEY, createJsonFromTrackList(tracksHistoryAdapter.tracks))
             .apply()
+    }
+
+    private fun audioPlayerIntent(track: Track) {
+        val audioPlayerIntent = Intent(this@SearchActivity, AudioPlayerActivity::class.java)
+        audioPlayerIntent.apply {
+            putExtra(KEY_FOR_TRACK_NAME, track.trackName)
+            putExtra(KEY_FOR_ARTIST_NAME, track.artistName)
+            putExtra(
+                KEY_FOR_TRACK_TIME,
+                SimpleDateFormat("mm:ss", Locale.getDefault()).format(track.trackTimeMillis)
+            )
+            putExtra(KEY_FOR_COLLECTION_NAME, track.collectionName)
+            putExtra(KEY_FOR_RELEASE_DATE, track.releaseDate.slice(0..3))
+            putExtra(KEY_FOR_PRIMARY_GENRE_NAME, track.primaryGenreName)
+            putExtra(KEY_FOR_COUNTRY, track.country)
+            putExtra(
+                KEY_FOR_ARTWORK_URL,
+                track.artworkUrl100.replaceAfterLast('/', "512x512bb.jpg")
+            )
+        }
+        startActivity(audioPlayerIntent)
     }
 
     private var savedText = INPUT_TEXT_DEF
@@ -277,5 +302,14 @@ class SearchActivity : AppCompatActivity() {
 
         const val SEARCH_HISTORY_PREFERENCE = "search_history_preference"
         const val TRACK_LIST_KEY = "key_for_track_list"
+
+        const val KEY_FOR_TRACK_NAME = "track_name"
+        const val KEY_FOR_ARTIST_NAME = "artist_name"
+        const val KEY_FOR_TRACK_TIME = "track_time"
+        const val KEY_FOR_COLLECTION_NAME = "collection_name"
+        const val KEY_FOR_RELEASE_DATE = "release_date"
+        const val KEY_FOR_PRIMARY_GENRE_NAME = "primary_genre_name"
+        const val KEY_FOR_COUNTRY = "country"
+        const val KEY_FOR_ARTWORK_URL = "art_work_url"
     }
 }
