@@ -94,6 +94,16 @@
                 android:text="@string/clear_history_button_text" />
         </LinearLayout>
 
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="140dp"
+            android:indeterminateTint="@color/light_theme_background"
+            android:visibility="gone">
+        </ProgressBar>
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -117,7 +127,7 @@
                 android:id="@+id/refreshButton"
                 style="@style/RefreshButton"
                 android:text="@string/refresh_button_text"
-                android:visibility="invisible" />
+                android:visibility="gone" />
 
         </LinearLayout>
     </FrameLayout>

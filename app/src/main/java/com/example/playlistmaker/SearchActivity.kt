@@ -5,15 +5,16 @@ import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -32,12 +33,22 @@ class SearchActivity : AppCompatActivity() {
 
     private val iTunesBaseUrl = "https://itunes.apple.com"
 
+    private val searchRunnable = Runnable { searchRequest() }
+
     private val retrofit = Retrofit.Builder()
         .baseUrl(iTunesBaseUrl)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
     private val iTunesService: ITunesApi = retrofit.create(ITunesApi::class.java)
+
+    private lateinit var sharedPreferences: SharedPreferences
+
+    private val mainThreadHandler = Handler(Looper.getMainLooper())
+
+    private var isClickAllowed = true
+
+    private var savedText = INPUT_TEXT_DEF
 
     private lateinit var inputEditText: EditText
     private lateinit var navigateBackButton: ImageView
@@ -49,16 +60,198 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var historyListRecycler: RecyclerView
     private lateinit var clearHistoryButton: TextView
     private lateinit var placeholderHistory: LinearLayout
-
-    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var progressBar: ProgressBar
 
     val tracksListAdapter = TrackAdapter {
-        addTrack(it)
-        audioPlayerIntent(it)
+        if (clickDebounce()) {
+            addTrack(it)
+            audioPlayerIntent(it)
+        }
     }
 
     val tracksHistoryAdapter = TrackAdapter {
-        audioPlayerIntent(it)
+        if (clickDebounce()) {
+            audioPlayerIntent(it)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_search)
+
+        inputEditText = findViewById(R.id.inputEditText)
+        navigateBackButton = findViewById(R.id.navigate_back)
+        clearButton = findViewById(R.id.clearIcon)
+        tracksListRecycler = findViewById(R.id.recyclerView)
+        placeholderImage = findViewById(R.id.placeholderImage)
+        placeholderText = findViewById(R.id.placeholderText)
+        refreshButton = findViewById(R.id.refreshButton)
+        historyListRecycler = findViewById(R.id.historyRecycler)
+        clearHistoryButton = findViewById(R.id.clearHistory)
+        placeholderHistory = findViewById(R.id.searchHistory)
+        progressBar = findViewById(R.id.progressBar)
+
+        sharedPreferences = getSharedPreferences(SEARCH_HISTORY_PREFERENCE, MODE_PRIVATE)
+
+        val savedTracks = sharedPreferences.getString(TRACK_LIST_KEY, null)
+        if (savedTracks != null) {
+            tracksHistoryAdapter.tracks = createTrackListFromJson(savedTracks)
+        }
+
+        tracksListRecycler.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        tracksListRecycler.adapter = tracksListAdapter
+
+        historyListRecycler.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        historyListRecycler.adapter = tracksHistoryAdapter
+
+        clearButton.setOnClickListener {
+            inputEditText.setText("")
+
+            tracksListAdapter.tracks.clear()
+            tracksListAdapter.notifyDataSetChanged()
+            hidePlaceholders()
+
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(inputEditText.windowToken, 0)
+        }
+
+        clearHistoryButton.setOnClickListener {
+            tracksHistoryAdapter.tracks.clear()
+            tracksHistoryAdapter.notifyDataSetChanged()
+            sharedPreferences.edit().remove(TRACK_LIST_KEY).apply()
+
+            placeholderHistory.visibility = View.GONE
+        }
+
+        refreshButton.setOnClickListener {
+            searchRequest()
+        }
+
+        inputEditText.setOnFocusChangeListener { _, hasFocus ->
+            placeholderHistory.visibility =
+                if (hasFocus && inputEditText.text.isEmpty() && tracksHistoryAdapter.tracks.isNotEmpty()) View.VISIBLE else View.GONE
+        }
+
+        navigateBackButton.setOnClickListener {
+            finish()
+        }
+
+        val textWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // empty
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (inputEditText.text.trim().isEmpty()) {
+                    tracksListRecycler.visibility = View.GONE
+                }
+
+                clearButton.visibility = clearButtonVisibility(s)
+                savedText = s.toString()
+
+                placeholderHistory.visibility =
+                    if (inputEditText.hasFocus() && s?.trim()
+                            ?.isEmpty() == true && tracksHistoryAdapter.tracks.isNotEmpty()
+                    ) View.VISIBLE else View.GONE
+
+                searchDebounce()
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                // empty
+            }
+        }
+
+        inputEditText.addTextChangedListener(textWatcher)
+    }
+
+    private fun searchDebounce() {
+        mainThreadHandler.removeCallbacks(searchRunnable)
+        mainThreadHandler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
+    }
+
+    private fun clearButtonVisibility(s: CharSequence?): Int {
+        return if (s.isNullOrEmpty()) {
+            View.GONE
+        } else {
+            View.VISIBLE
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.run {
+            putString(INPUT_TEXT, savedText)
+        }
+
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+
+        savedText = savedInstanceState.getString(INPUT_TEXT, INPUT_TEXT_DEF)
+        inputEditText.setText(savedText)
+    }
+
+    private fun searchRequest() {
+        if (inputEditText.text.trim().isNotEmpty()) {
+            hidePlaceholders()
+            progressBar.visibility = View.VISIBLE
+            tracksListRecycler.visibility = View.GONE
+
+            iTunesService.search(inputEditText.text.toString())
+                .enqueue(object : Callback<TracksResponse> {
+                    override fun onResponse(
+                        call: Call<TracksResponse>,
+                        response: Response<TracksResponse>
+                    ) {
+                        progressBar.visibility = View.GONE
+                        when (response.code()) {
+                            200 -> {
+                                tracksListAdapter.tracks.clear()
+                                if (response.body()?.tracks?.isNotEmpty() == true) {
+                                    tracksListRecycler.visibility = View.VISIBLE
+                                    tracksListAdapter.tracks.addAll(response.body()?.tracks!!)
+                                    tracksListAdapter.notifyDataSetChanged()
+                                } else {
+                                    showPlaceholders(
+                                        R.string.nothing_found_placeholder_text,
+                                        R.drawable.ic_nothing_found_placeholder
+                                    )
+                                }
+                            }
+
+                            else -> {
+                                showPlaceholders(
+                                    R.string.network_error_placeholder_text,
+                                    R.drawable.ic_network_error_placeholder
+                                )
+                                refreshButton.visibility = View.VISIBLE
+                            }
+                        }
+                    }
+
+                    override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
+                        showPlaceholders(
+                            R.string.network_error_placeholder_text,
+                            R.drawable.ic_network_error_placeholder
+                        )
+                        refreshButton.visibility = View.VISIBLE
+                    }
+                })
+        }
+    }
+
+    private fun clickDebounce(): Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            mainThreadHandler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE)
+        }
+
+        return current
     }
 
     private fun addTrack(track: Track) {
@@ -102,167 +295,9 @@ class SearchActivity : AppCompatActivity() {
                 KEY_FOR_ARTWORK_URL,
                 track.artworkUrl100.replaceAfterLast('/', "512x512bb.jpg")
             )
+            putExtra(KEY_FOR_PREVIEW_URL, track.previewUrl)
         }
         startActivity(audioPlayerIntent)
-    }
-
-    private var savedText = INPUT_TEXT_DEF
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_search)
-
-        inputEditText = findViewById(R.id.inputEditText)
-        navigateBackButton = findViewById(R.id.navigate_back)
-        clearButton = findViewById(R.id.clearIcon)
-        tracksListRecycler = findViewById(R.id.recyclerView)
-        placeholderImage = findViewById(R.id.placeholderImage)
-        placeholderText = findViewById(R.id.placeholderText)
-        refreshButton = findViewById(R.id.refreshButton)
-        historyListRecycler = findViewById(R.id.historyRecycler)
-        clearHistoryButton = findViewById(R.id.clearHistory)
-        placeholderHistory = findViewById(R.id.searchHistory)
-
-        sharedPreferences = getSharedPreferences(SEARCH_HISTORY_PREFERENCE, MODE_PRIVATE)
-
-        val savedTracks = sharedPreferences.getString(TRACK_LIST_KEY, null)
-        if (savedTracks != null) {
-            tracksHistoryAdapter.tracks = createTrackListFromJson(savedTracks)
-        }
-
-        tracksListRecycler.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        tracksListRecycler.adapter = tracksListAdapter
-
-        historyListRecycler.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        historyListRecycler.adapter = tracksHistoryAdapter
-
-        clearButton.setOnClickListener {
-            inputEditText.setText("")
-
-            tracksListAdapter.tracks.clear()
-            tracksListAdapter.notifyDataSetChanged()
-            hidePlaceholders()
-
-            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(inputEditText.windowToken, 0)
-        }
-
-        clearHistoryButton.setOnClickListener {
-            tracksHistoryAdapter.tracks.clear()
-            tracksHistoryAdapter.notifyDataSetChanged()
-            sharedPreferences.edit().remove(TRACK_LIST_KEY).apply()
-
-            placeholderHistory.visibility = View.GONE
-        }
-
-        refreshButton.setOnClickListener {
-            search()
-        }
-
-        inputEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                if (inputEditText.text.isNotEmpty()) {
-                    search()
-                }
-            }
-            false
-        }
-
-        inputEditText.setOnFocusChangeListener { view, hasFocus ->
-            placeholderHistory.visibility =
-                if (hasFocus && inputEditText.text.isEmpty() && tracksHistoryAdapter.tracks.isNotEmpty()) View.VISIBLE else View.GONE
-        }
-
-        navigateBackButton.setOnClickListener {
-            finish()
-        }
-
-        val textWatcher = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // empty
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                clearButton.visibility = clearButtonVisibility(s)
-                savedText = s.toString()
-
-                placeholderHistory.visibility =
-                    if (inputEditText.hasFocus() && s?.isEmpty() == true && tracksHistoryAdapter.tracks.isNotEmpty()) View.VISIBLE else View.GONE
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                // empty
-            }
-        }
-
-        inputEditText.addTextChangedListener(textWatcher)
-    }
-
-    private fun clearButtonVisibility(s: CharSequence?): Int {
-        return if (s.isNullOrEmpty()) {
-            View.GONE
-        } else {
-            View.VISIBLE
-        }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.run {
-            putString(INPUT_TEXT, savedText)
-        }
-
-        super.onSaveInstanceState(outState)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-
-        savedText = savedInstanceState.getString(INPUT_TEXT, INPUT_TEXT_DEF)
-        inputEditText.setText(savedText)
-    }
-
-    private fun search() {
-        tracksListAdapter.tracks.clear()
-        hidePlaceholders()
-
-        iTunesService.search(inputEditText.text.toString())
-            .enqueue(object : Callback<TracksResponse> {
-                override fun onResponse(
-                    call: Call<TracksResponse>,
-                    response: Response<TracksResponse>
-                ) {
-                    when (response.code()) {
-                        200 -> {
-                            if (response.body()?.tracks?.isNotEmpty() == true) {
-                                tracksListAdapter.tracks.addAll(response.body()?.tracks!!)
-                                tracksListAdapter.notifyDataSetChanged()
-                            } else {
-                                showPlaceholders(
-                                    R.string.nothing_found_placeholder_text,
-                                    R.drawable.ic_nothing_found_placeholder
-                                )
-                            }
-                        }
-
-                        else -> {
-                            showPlaceholders(
-                                R.string.network_error_placeholder_text,
-                                R.drawable.ic_network_error_placeholder
-                            )
-                            refreshButton.visibility = View.VISIBLE
-                        }
-                    }
-                }
-
-                override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
-                    showPlaceholders(
-                        R.string.network_error_placeholder_text,
-                        R.drawable.ic_network_error_placeholder
-                    )
-                    refreshButton.visibility = View.VISIBLE
-                }
-            })
     }
 
     private fun showPlaceholders(@StringRes text: Int, @DrawableRes image: Int) {
@@ -288,9 +323,6 @@ class SearchActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
 
-        Log.d("TAG", "onStop")
-        Log.d("TAG", createJsonFromTrackList(tracksHistoryAdapter.tracks))
-
         sharedPreferences.edit()
             .putString(TRACK_LIST_KEY, createJsonFromTrackList(tracksHistoryAdapter.tracks))
             .apply()
@@ -311,5 +343,9 @@ class SearchActivity : AppCompatActivity() {
         const val KEY_FOR_PRIMARY_GENRE_NAME = "primary_genre_name"
         const val KEY_FOR_COUNTRY = "country"
         const val KEY_FOR_ARTWORK_URL = "art_work_url"
+        const val KEY_FOR_PREVIEW_URL = "preview_url"
+
+        const val SEARCH_DEBOUNCE_DELAY = 2000L
+        const val CLICK_DEBOUNCE = 1000L
     }
 }

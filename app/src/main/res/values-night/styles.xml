@@ -132,7 +132,7 @@
     </style>
 
     <style name="AudioPlayerPlayButton">
-        <item name="android:src">@drawable/button_play_night</item>
+        <item name="android:tint">@color/white</item>
     </style>
 
     <style name="AudioPlayerAddToFavoriteButton">
